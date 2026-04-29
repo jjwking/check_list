@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>비계 구조검토 의뢰 체크리스트 - (주)이필</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Malgun Gothic', '맑은 고딕', sans-serif;
+      background: #f0f2f5;
+      color: #222;
+      min-height: 100vh;
+      padding: 30px 16px;
+    }
+
+    .container {
+      max-width: 860px;
+      margin: 0 auto;
+    }
+
+    header {
+      background: #1a3a5c;
+      color: #fff;
+      border-radius: 10px 10px 0 0;
+      padding: 28px 36px 22px;
+    }
+
+    header h1 {
+      font-size: 1.6rem;
+      letter-spacing: -0.5px;
+    }
+
+    header p {
+      margin-top: 6px;
+      font-size: 0.85rem;
+      opacity: 0.75;
+    }
+
+    .card {
+      background: #fff;
+      border: 1px solid #dde3ec;
+      border-top: none;
+      padding: 28px 36px;
+    }
+
+    .card:last-child {
+      border-radius: 0 0 10px 10px;
+      border-top: none;
+    }
+
+    /* 기본정보 그리드 */
+    .info-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px 24px;
+    }
+
+    .info-grid .full { grid-column: 1 / -1; }
+
+    .field label {
+      display: block;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: #555;
+      margin-bottom: 5px;
+    }
+
+    .field input, .field select, .field textarea {
+      width: 100%;
+      padding: 8px 10px;
+      border: 1px solid #ccd2db;
+      border-radius: 6px;
+      font-family: inherit;
+      font-size: 0.9rem;
+      background: #fafbfc;
+      transition: border-color .2s;
+    }
+
+    .field input:focus, .field select:focus, .field textarea:focus {
+      outline: none;
+      border-color: #1a3a5c;
+      background: #fff;
+    }
+
+    .field textarea { resize: vertical; min-height: 70px; }
+
+    /* 섹션 */
+    .section {
+      margin-top: 28px;
+    }
+
+    .section-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #1a3a5c;
+      border-left: 4px solid #1a3a5c;
+      padding-left: 10px;
+      margin-bottom: 16px;
+    }
+
+    /* 체크리스트 */
+    .checklist {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      border: 1px solid #dde3ec;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .check-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 12px 16px;
+      border-bottom: 1px solid #eef0f4;
+      transition: background .15s;
+    }
+
+    .check-item:last-child { border-bottom: none; }
+    .check-item:hover { background: #f5f7fa; }
+
+    .check-item input[type="checkbox"] {
+      width: 17px;
+      height: 17px;
+      margin-top: 2px;
+      accent-color: #1a3a5c;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    .check-item label {
+      font-size: 0.9rem;
+      cursor: pointer;
+      line-height: 1.5;
+    }
+
+    .check-item label span.sub {
+      display: block;
+      font-size: 0.78rem;
+      color: #888;
+      margin-top: 2px;
+    }
+
+    .check-item.required label::after {
+      content: ' ★';
+      color: #c0392b;
+      font-size: 0.75rem;
+    }
+
+    /* 비계 종류 선택 */
+    .type-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+
+    .type-item {
+      border: 2px solid #dde3ec;
+      border-radius: 8px;
+      padding: 12px 10px;
+      text-align: center;
+      cursor: pointer;
+      transition: all .2s;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #444;
+      user-select: none;
+    }
+
+    .type-item:hover { border-color: #1a3a5c; color: #1a3a5c; background: #eef2f7; }
+    .type-item.selected { border-color: #1a3a5c; background: #1a3a5c; color: #fff; }
+
+    .type-item .icon { font-size: 1.5rem; display: block; margin-bottom: 4px; }
+
+    /* 규격 입력 */
+    .spec-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+    }
+
+    /* 진행률 바 */
+    .progress-bar-wrap {
+      background: #eef0f4;
+      border-radius: 20px;
+      height: 10px;
+      overflow: hidden;
+      margin-top: 6px;
+    }
+
+    .progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, #1a3a5c, #2980b9);
+      border-radius: 20px;
+      transition: width .4s;
+      width: 0%;
+    }
+
+    .progress-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.78rem;
+      color: #666;
+      margin-bottom: 4px;
+    }
+
+    /* 제출 버튼 */
+    .actions {
+      display: flex;
+      gap: 12px;
+      justify-content: flex-end;
+      margin-top: 28px;
+      padding-top: 20px;
+      border-top: 1px solid #eef0f4;
+    }
+
+    .btn {
+      padding: 11px 28px;
+      border-radius: 7px;
+      font-family: inherit;
+      font-size: 0.92rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      transition: all .2s;
+    }
+
+    .btn-outline {
+      background: #fff;
+      border: 1.5px solid #aab4c0;
+      color: #444;
+    }
+
+    .btn-outline:hover { border-color: #1a3a5c; color: #1a3a5c; }
+
+    .btn-primary {
+      background: #1a3a5c;
+      color: #fff;
+    }
+
+    .btn-primary:hover { background: #16304e; }
+
+    .btn-print {
+      background: #27ae60;
+      color: #fff;
+    }
+
+    .btn-print:hover { background: #219150; }
+
+    .btn-attach {
+      background: #e67e22;
+      color: #fff;
+    }
+    .btn-attach:hover { background: #ca6f1e; }
+
+    /* 결과 배지 */
+    .badge {
+      display: inline-block;
+      padding: 2px 9px;
+      border-radius: 12px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      margin-left: 8px;
+    }
+
+    .badge-req { background: #fde8e8; color: #c0392b; }
+    .badge-doc { background: #e8f4fd; color: #1a6fa8; }
+
+    /* 서명란 */
+    .sign-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-top: 8px;
+    }
+
+    .sign-box {
+      border: 1px solid #ccd2db;
+      border-radius: 8px;
+      padding: 14px 12px 10px;
+      text-align: center;
+    }
+
+    .sign-box .sign-title {
+      font-size: 0.78rem;
+      color: #888;
+      margin-bottom: 28px;
+    }
+
+    .sign-box .sign-line {
+      border-top: 1px solid #ccd2db;
+      padding-top: 6px;
+      font-size: 0.8rem;
+      color: #aaa;
+    }
+
+    @media print {
+      body { background: #fff; padding: 0; }
+      .actions { display: none; }
+      .card { border: none; }
+      header { border-radius: 0; }
+    }
+
+    @media (max-width: 600px) {
+      .info-grid { grid-template-columns: 1fr; }
+      .type-grid { grid-template-columns: repeat(2, 1fr); }
+      .spec-grid { grid-template-columns: 1fr 1fr; }
+      .sign-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <header>
+    <div style="font-size:0.8rem; opacity:0.7; margin-bottom:4px;">(주)이필</div>
+    <h1>비계 구조검토 의뢰 체크리스트</h1>
+    <p>Scaffolding Structural Review Request Checklist</p>
+    <p style="margin-top:10px; font-size:0.88rem; background:rgba(255,255,255,0.12); border-radius:6px; padding:10px 14px; line-height:1.7;">
+      📋 아시는 항목만 작성해 주셔도 됩니다. 모르시는 항목은 비워두셔도 무방하며, 담당자가 확인 후 안내드리겠습니다.
+    </p>
+  </header>
+
+  <!-- 진행률 -->
+  <div class="card" style="padding: 18px 36px;">
+    <div class="progress-label">
+      <span>체크리스트 완료율</span>
+      <span id="pct">0%</span>
+    </div>
+    <div class="progress-bar-wrap">
+      <div class="progress-bar" id="bar"></div>
+    </div>
+  </div>
+
+  <!-- ① 기본 정보 -->
+  <div class="card">
+    <div class="section-title">1. 프로젝트 정보</div>
+    <div class="info-grid">
+      <div class="field full">
+        <label>현장명</label>
+        <input type="text" placeholder="예) ○○○ 신축공사">
+      </div>
+      <div class="field full">
+        <label>설치 주소</label>
+        <input type="text" placeholder="예) 경기도 수원시 ○○구 ○○동">
+      </div>
+      <div class="field">
+        <label>의뢰업체명</label>
+        <input type="text" placeholder="회사명">
+      </div>
+      <div class="field">
+        <label>발주처 <span style="font-weight:400; color:#999;">(건축사, 건설사, 비계업체 등)</span></label>
+        <input type="text" placeholder="발주처명">
+      </div>
+    </div>
+  </div>
+
+  <!-- ② 비계 설치 및 검토 조건 -->
+  <div class="card" style="border-top: 1px solid #dde3ec;">
+    <div class="section-title">2. 비계 설치 및 검토 조건</div>
+
+    <div style="margin-bottom:18px;">
+      <div style="font-size:0.82rem; color:#555; font-weight:600; margin-bottom:8px;">비계 유형</div>
+      <div style="display:flex; gap:12px;">
+        <label style="display:flex; align-items:center; gap:7px; cursor:pointer; font-size:0.92rem;">
+          <input type="checkbox" id="t1" class="chk"> 외줄비계
+        </label>
+        <label style="display:flex; align-items:center; gap:7px; cursor:pointer; font-size:0.92rem;">
+          <input type="checkbox" id="t2" class="chk"> 쌍줄비계
+        </label>
+      </div>
+    </div>
+
+    <div style="margin-bottom:18px;">
+      <div style="font-size:0.82rem; color:#555; font-weight:600; margin-bottom:8px;">설치 목적</div>
+      <div style="display:flex; gap:12px; flex-wrap:wrap;">
+        <label style="display:flex; align-items:center; gap:7px; cursor:pointer; font-size:0.92rem;">
+          <input type="checkbox" id="p1" class="chk"> 신축용
+        </label>
+        <label style="display:flex; align-items:center; gap:7px; cursor:pointer; font-size:0.92rem;">
+          <input type="checkbox" id="p2" class="chk"> 해체/철거용
+        </label>
+        <label style="display:flex; align-items:center; gap:7px; cursor:pointer; font-size:0.92rem;">
+          <input type="checkbox" id="p3" class="chk"> 보수/도장용
+        </label>
+      </div>
+    </div>
+
+    <div style="margin-bottom:18px;">
+      <div style="font-size:0.82rem; color:#555; font-weight:600; margin-bottom:8px;">부속 시설 여부</div>
+      <div style="display:flex; gap:12px; flex-wrap:wrap;">
+        <label style="display:flex; align-items:center; gap:7px; cursor:pointer; font-size:0.92rem;">
+          <input type="checkbox" id="s1" class="chk"> 가설휀스
+        </label>
+        <label style="display:flex; align-items:center; gap:7px; cursor:pointer; font-size:0.92rem;">
+          <input type="checkbox" id="s2" class="chk"> 낙하물 방지망
+        </label>
+      </div>
+    </div>
+
+    <div class="field" style="max-width:220px;">
+      <label>비계 높이 (m)</label>
+      <input type="number" placeholder="0.0" step="0.1" min="0" id="reqHeight">
+      <div style="font-size:0.75rem; color:#e67e22; margin-top:5px;">※ 31m 이상 시 건설기술진흥법에 따라 구조검토 의무 대상입니다.</div>
+    </div>
+  </div>
+
+  <!-- ③ 자료 제공 현황 -->
+  <div class="card" style="border-top: 1px solid #dde3ec;">
+    <div class="section-title">3. 자료 제공 현황</div>
+
+    <div style="margin-bottom:14px;">
+      <div style="font-size:0.82rem; color:#555; font-weight:600; margin-bottom:8px;">건축 도면</div>
+      <div style="display:flex; gap:12px;">
+        <label style="display:flex; align-items:center; gap:7px; cursor:pointer; font-size:0.92rem;">
+          <input type="checkbox" id="d1" class="chk"> 있음 (평면/단면도)
+        </label>
+        <label style="display:flex; align-items:center; gap:7px; cursor:pointer; font-size:0.92rem;">
+          <input type="checkbox" id="d2" class="chk"> 없음
+        </label>
+      </div>
+    </div>
+
+    <div style="margin-bottom:14px;">
+      <div style="font-size:0.82rem; color:#555; font-weight:600; margin-bottom:8px;">비계 도면</div>
+      <div style="display:flex; gap:12px;">
+        <label style="display:flex; align-items:center; gap:7px; cursor:pointer; font-size:0.92rem;">
+          <input type="checkbox" id="d3" class="chk"> 있음 (CAD)
+        </label>
+        <label style="display:flex; align-items:center; gap:7px; cursor:pointer; font-size:0.92rem;">
+          <input type="checkbox" id="d4" class="chk"> 없음 (당사 도면 작업 필요)
+        </label>
+      </div>
+    </div>
+
+    <div style="margin-bottom:14px;">
+      <div style="font-size:0.82rem; color:#555; font-weight:600; margin-bottom:8px;">지반 조건</div>
+      <div style="display:flex; gap:12px; flex-wrap:wrap;">
+        <label style="display:flex; align-items:center; gap:7px; cursor:pointer; font-size:0.92rem;">
+          <input type="checkbox" id="g1" class="chk"> 콘크리트 바닥
+        </label>
+        <label style="display:flex; align-items:center; gap:7px; cursor:pointer; font-size:0.92rem;">
+          <input type="checkbox" id="g2" class="chk"> 토사
+        </label>
+        <label style="display:flex; align-items:center; gap:7px; cursor:pointer; font-size:0.92rem;">
+          <input type="checkbox" id="g3" class="chk"> 기타
+        </label>
+        <input type="text" id="groundEtc" placeholder="기타 지반 조건 입력" style="border:1px solid #ccd2db; border-radius:5px; padding:4px 8px; font-size:0.85rem; width:160px;">
+      </div>
+    </div>
+
+    <div>
+      <div style="font-size:0.82rem; color:#555; font-weight:600; margin-bottom:8px;">현장 사진</div>
+      <div style="display:flex; gap:12px;">
+        <label style="display:flex; align-items:center; gap:7px; cursor:pointer; font-size:0.92rem;">
+          <input type="checkbox" id="ph1" class="chk"> 있음
+        </label>
+        <label style="display:flex; align-items:center; gap:7px; cursor:pointer; font-size:0.92rem;">
+          <input type="checkbox" id="ph2" class="chk"> 없음
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <!-- 상세 정보 안내 배너 -->
+  <div style="background:#eef4fb; border:1px solid #b8d4ed; border-top:none; padding:14px 36px; display:flex; align-items:center; gap:10px;">
+    <span style="font-size:1.2rem;">📐</span>
+    <div>
+      <div style="font-size:0.88rem; font-weight:700; color:#1a3a5c;">아래 상세 정보를 추가로 작성해 주시면 보다 정확하고 빠른 구조검토가 가능합니다.</div>
+      <div style="font-size:0.8rem; color:#555; margin-top:2px;">작성이 어려운 항목은 비워두셔도 무방합니다. 담당자가 확인 후 안내드리겠습니다.</div>
+    </div>
+  </div>
+
+  <!-- ④ 상세 검토 조건 -->
+  <div class="card" style="border-top: 1px solid #dde3ec;">
+    <div class="section-title">4. 상세 검토 조건 <span style="font-size:0.78rem; font-weight:400; color:#999;">(선택사항)</span></div>
+    <div class="spec-grid">
+      <div class="field">
+        <label>설치 길이 (m)</label>
+        <input type="number" placeholder="0.0" step="0.1" min="0">
+      </div>
+      <div class="field">
+        <label>설치 너비 (m)</label>
+        <input type="number" placeholder="0.0" step="0.1" min="0">
+      </div>
+      <div class="field">
+        <label>적재하중 (kN/m²)</label>
+        <input type="number" placeholder="0.0" step="0.1" min="0">
+      </div>
+    </div>
+    <div class="field" style="margin-top:14px;">
+      <label>특기사항 및 요청사항</label>
+      <textarea style="min-height:90px;" placeholder="현장 여건, 특이사항, 요청사항 등을 자유롭게 작성해 주세요."></textarea>
+    </div>
+  </div>
+
+  <!-- ⑤ 구조검토 항목 체크리스트 -->
+  <div class="card" style="border-top: 1px solid #dde3ec;">
+    <div class="section-title">5. 구조검토 항목 체크리스트 <span style="font-size:0.78rem; font-weight:400; color:#999;">(선택사항)</span></div>
+
+    <div style="margin-bottom:16px;">
+      <div style="font-size:0.82rem; color:#888; margin-bottom:8px;">▸ 하중 검토</div>
+      <div class="checklist">
+        <div class="check-item"><input type="checkbox" id="c1" class="chk"><label for="c1">고정하중(자중) 산정 자료 준비<span class="sub">비계 자재 무게, 발판 무게 등 포함</span></label></div>
+        <div class="check-item"><input type="checkbox" id="c2" class="chk"><label for="c2">활하중(작업하중) 산정<span class="sub">작업자 하중, 자재 적재하중 포함</span></label></div>
+        <div class="check-item"><input type="checkbox" id="c3" class="chk"><label for="c3">풍하중 검토<span class="sub">지역 풍속, 노풍도, 형상계수 적용</span></label></div>
+      </div>
+    </div>
+
+    <div style="margin-bottom:16px;">
+      <div style="font-size:0.82rem; color:#888; margin-bottom:8px;">▸ 부재 및 접합부 검토</div>
+      <div class="checklist">
+        <div class="check-item"><input type="checkbox" id="c4" class="chk"><label for="c4">수직재 좌굴 검토<span class="sub">세장비, 유효좌굴길이 적용</span></label></div>
+        <div class="check-item"><input type="checkbox" id="c5" class="chk"><label for="c5">수평재 휨·전단 검토</label></div>
+        <div class="check-item"><input type="checkbox" id="c6" class="chk"><label for="c6">벽이음(Wall tie) 간격 및 구조 검토<span class="sub">수직·수평 간격 기준 준수 확인</span></label></div>
+      </div>
+    </div>
+
+    <div>
+      <div style="font-size:0.82rem; color:#888; margin-bottom:8px;">▸ 안전 설비 계획</div>
+      <div class="checklist">
+        <div class="check-item"><input type="checkbox" id="c7" class="chk"><label for="c7">안전난간 설치 계획<span class="sub">상부난간대, 중간난간대, 발끝막이판</span></label></div>
+        <div class="check-item"><input type="checkbox" id="c8" class="chk"><label for="c8">낙하물 방지망 설치 계획</label></div>
+        <div class="check-item"><input type="checkbox" id="c9" class="chk"><label for="c9">작업발판 고정 방법 확인<span class="sub">발판 폭, 틈새, 겹침 기준 준수</span></label></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 구조검토 비용 -->
+  <div class="card" style="border-top: 1px solid #dde3ec;">
+    <div class="section-title">8. 구조검토 비용 안내</div>
+    <table style="width:100%; border-collapse:collapse; font-size:0.9rem;">
+      <thead>
+        <tr style="background:#1a3a5c; color:#fff;">
+          <th style="padding:10px 14px; text-align:left; border-radius:0;">서비스 구분</th>
+          <th style="padding:10px 14px; text-align:center;">31m 미만</th>
+          <th style="padding:10px 14px; text-align:center;">31m 이상</th>
+          <th style="padding:10px 14px; text-align:center;">소요기간</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr style="border-bottom:1px solid #dde3ec;">
+          <td style="padding:12px 14px; font-weight:600;">비계 도면 제공 시</td>
+          <td style="padding:12px 14px; text-align:center; color:#1a3a5c; font-weight:700;">600,000원</td>
+          <td style="padding:12px 14px; text-align:center; color:#1a3a5c; font-weight:700;">800,000원</td>
+          <td style="padding:12px 14px; text-align:center; color:#555;">영업일 2일</td>
+        </tr>
+        <tr>
+          <td style="padding:12px 14px; font-weight:600;">도면 작업 필요 시</td>
+          <td style="padding:12px 14px; text-align:center; color:#1a3a5c; font-weight:700;">800,000원</td>
+          <td style="padding:12px 14px; text-align:center; color:#1a3a5c; font-weight:700;">1,000,000원</td>
+          <td style="padding:12px 14px; text-align:center; color:#555;">영업일 3일</td>
+        </tr>
+      </tbody>
+    </table>
+    <p style="margin-top:10px; font-size:0.8rem; color:#888;">※ 비계 높이 31m는 건설기술진흥법 시행령에 따라 구조적 안전성을 확인받아야 하는 기준입니다.</p>
+  </div>
+
+  <!-- 구조검토 결과물 -->
+  <div class="card" style="border-top: 1px solid #dde3ec;">
+    <div class="section-title">9. 구조검토 결과물</div>
+    <div class="checklist">
+      <div class="check-item">
+        <span style="font-size:1.1rem; margin-right:4px;">📄</span>
+        <label>비계 구조검토서 PDF <span style="color:#1a3a5c; font-weight:700;">(기술사 날인 포함)</span></label>
+      </div>
+      <div class="check-item">
+        <span style="font-size:1.1rem; margin-right:4px;">📐</span>
+        <label>도면 캐드 파일 <span style="color:#888; font-size:0.85rem;">(필요한 경우)</span></label>
+      </div>
+    </div>
+  </div>
+
+  <!-- 버튼 -->
+  <div class="actions">
+    <button class="btn btn-outline" onclick="resetAll()">초기화</button>
+    <button class="btn btn-print" onclick="window.print()">🖨️ 인쇄</button>
+    <button class="btn btn-primary" onclick="submitCheck()">제출 확인</button>
+    <button class="btn btn-attach" onclick="window.open('https://docs.google.com/forms/d/e/1FAIpQLSeOB1jLfhm7xwbvvLvD9H2CmkQWUiDyq-K_PzY6y8eC38-g_w/viewform?usp=publish-editor','_blank')">📎 자료 첨부하기</button>
+  </div>
+
+</div>
+
+<script>
+  // 오늘 날짜
+  const today = new Date();
+  const fmt = d => d.toISOString().split('T')[0];
+  document.getElementById('today').textContent = fmt(today);
+  document.getElementById('reqDate').value = fmt(today);
+
+  // 비계 종류 선택
+  document.querySelectorAll('.type-item').forEach(el => {
+    el.addEventListener('click', () => {
+      document.querySelectorAll('.type-item').forEach(x => x.classList.remove('selected'));
+      el.classList.add('selected');
+    });
+  });
+
+  // 진행률
+  function updateProgress() {
+    const all = document.querySelectorAll('.chk');
+    const done = [...all].filter(c => c.checked).length;
+    const pct = Math.round(done / all.length * 100);
+    document.getElementById('bar').style.width = pct + '%';
+    document.getElementById('pct').textContent = pct + '%';
+  }
+
+  document.querySelectorAll('.chk').forEach(c => {
+    c.addEventListener('change', updateProgress);
+  });
+
+  // 초기화
+  function resetAll() {
+    if (!confirm('모든 입력 내용을 초기화하시겠습니까?')) return;
+    document.querySelectorAll('input[type="text"], input[type="number"], textarea').forEach(el => el.value = '');
+    document.querySelectorAll('.chk').forEach(c => c.checked = false);
+    document.querySelectorAll('.type-item').forEach(el => el.classList.remove('selected'));
+    document.getElementById('reqDate').value = fmt(today);
+    updateProgress();
+  }
+
+  // 제출 확인 + EmailJS 전송
+  function submitCheck() {
+    const inputs = document.querySelectorAll('input[type="text"]');
+    const site    = inputs[0]?.value || '(미입력)';
+    const address = inputs[1]?.value || '(미입력)';
+    const company = inputs[2]?.value || '(미입력)';
+    const client  = inputs[3]?.value || '(미입력)';
+
+    const scaffoldType = [
+      document.getElementById('t1')?.checked ? '외줄비계' : '',
+      document.getElementById('t2')?.checked ? '쌍줄비계' : ''
+    ].filter(Boolean).join(', ') || '(미선택)';
+
+    const purpose = [
+      document.getElementById('p1')?.checked ? '신축용' : '',
+      document.getElementById('p2')?.checked ? '해체/철거용' : '',
+      document.getElementById('p3')?.checked ? '보수/도장용' : ''
+    ].filter(Boolean).join(', ') || '(미선택)';
+
+    const height = document.getElementById('reqHeight')?.value || '(미입력)';
+
+    const hasDwg = [
+      document.getElementById('d1')?.checked ? '건축도면 있음' : '',
+      document.getElementById('d2')?.checked ? '건축도면 없음' : '',
+      document.getElementById('d3')?.checked ? '비계도면 있음(CAD)' : '',
+      document.getElementById('d4')?.checked ? '비계도면 없음(도면작업필요)' : ''
+    ].filter(Boolean).join(', ') || '(미입력)';
+
+    const ground = [
+      document.getElementById('g1')?.checked ? '콘크리트 바닥' : '',
+      document.getElementById('g2')?.checked ? '토사' : '',
+      document.getElementById('g3')?.checked ? '기타: ' + (document.getElementById('groundEtc')?.value || '') : ''
+    ].filter(Boolean).join(', ') || '(미입력)';
+
+    const photo = document.getElementById('ph1')?.checked ? '있음' : document.getElementById('ph2')?.checked ? '없음' : '(미입력)';
+
+    const textareas = document.querySelectorAll('textarea');
+    const remarks = textareas[0]?.value || '(없음)';
+
+    const message = `
+■ 현장명: ${site}
+■ 설치 주소: ${address}
+■ 의뢰업체명: ${company}
+■ 발주처: ${client}
+
+■ 비계 유형: ${scaffoldType}
+■ 설치 목적: ${purpose}
+■ 비계 높이: ${height}m
+
+■ 자료 제공 현황: ${hasDwg}
+■ 지반 조건: ${ground}
+■ 현장 사진: ${photo}
+
+■ 특기사항:
+${remarks}
+    `.trim();
+
+    const btn = document.querySelector('.btn-primary');
+    btn.disabled = true;
+    btn.textContent = '전송 중...';
+
+    emailjs.send('gmail_ipil', 'template_br09y5a', {
+      company_name: company || site,
+      message: message
+    }).then(() => {
+      btn.disabled = false;
+      btn.textContent = '제출 확인';
+      alert('✅ 의뢰 내용이 전송되었습니다!\n관련 자료가 있으시면 [📎 자료 첨부하기] 버튼을 이용해 주세요.');
+    }).catch(err => {
+      btn.disabled = false;
+      btn.textContent = '제출 확인';
+      alert('전송 중 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.\n' + JSON.stringify(err));
+    });
+  }
+</script>
+<!-- EmailJS -->
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script>emailjs.init('q8B_sWuZ1TpCwFCOV');</script>
+</body>
+</html>
